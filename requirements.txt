@@ -1,0 +1,4 @@
+# pyperclip enables automatic clipboard copy on all platforms.
+# It is optional – the script works without it by falling back to
+# platform-specific commands (xclip / xsel / pbcopy / clip).
+pyperclip>=1.8
