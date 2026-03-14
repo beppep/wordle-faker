@@ -33,8 +33,11 @@ class TestGetWordleNumber(unittest.TestCase):
         self.assertGreater(num, 0)
 
     def test_known_date(self):
-        # 2022-01-14 is 209 days after 2021-06-19, so puzzle 210
-        self.assertEqual(get_wordle_number(date(2022, 1, 14)), 210)
+        # 2022-01-14 is 208 days after 2021-06-20, so puzzle 209
+        self.assertEqual(get_wordle_number(date(2022, 1, 14)), 209)
+
+    def test_march_14_2026_is_puzzle_1729(self):
+        self.assertEqual(get_wordle_number(date(2026, 3, 14)), 1729)
 
 
 class TestGenerateRow(unittest.TestCase):
@@ -93,6 +96,11 @@ class TestFormatScore(unittest.TestCase):
         rows = [[GREEN] * WORD_LENGTH]
         text = format_score(623, 1, rows)
         self.assertTrue(text.startswith("Wordle 623 1/6"))
+
+    def test_header_format_uses_comma_for_large_numbers(self):
+        rows = [[GREEN] * WORD_LENGTH]
+        text = format_score(1729, 2, rows)
+        self.assertTrue(text.startswith("Wordle 1,729 2/6"))
 
     def test_blank_line_after_header(self):
         rows = [[GREEN] * WORD_LENGTH]

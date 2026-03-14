@@ -22,8 +22,8 @@ BLACK = "\u2b1b"       # ⬛
 
 WORD_LENGTH = 5
 
-# Wordle puzzle #1 was published on June 19 2021 (Josh Wardle's original game)
-WORDLE_EPOCH = date(2021, 6, 19)
+# Wordle puzzle #1 was published on June 20 2021 (Josh Wardle's original game)
+WORDLE_EPOCH = date(2021, 6, 20)
 
 
 # ── core logic ───────────────────────────────────────────────────────────────
@@ -81,7 +81,7 @@ def generate_score(num_guesses: int) -> list[list[str]]:
 
 def format_score(wordle_num: int, num_guesses: int, rows: list[list[str]]) -> str:
     """Render the score as the text Wordle copies to the clipboard."""
-    lines = [f"Wordle {wordle_num} {num_guesses}/6", ""]
+    lines = [f"Wordle {wordle_num:,} {num_guesses}/6", ""]
     for row in rows:
         lines.append("".join(row))
     return "\n".join(lines)
@@ -129,7 +129,7 @@ def copy_to_clipboard(text: str) -> bool:
 
 # ── entry point ──────────────────────────────────────────────────────────────
 def main() -> None:
-    num_guesses = random.randint(2, 4)
+    num_guesses = random.choices([2, 3, 4], weights=[4, 4, 1])[0]
     wordle_num = get_wordle_number()
     rows = generate_score(num_guesses)
     score_text = format_score(wordle_num, num_guesses, rows)
