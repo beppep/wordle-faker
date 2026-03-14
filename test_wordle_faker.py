@@ -2,7 +2,7 @@
 
 import unittest
 from datetime import date
-from unittest.mock import patch
+from unittest.mock import call, patch
 
 from wordle_faker import (
     BLACK,
@@ -10,6 +10,8 @@ from wordle_faker import (
     WORD_LENGTH,
     WORDLE_EPOCH,
     YELLOW,
+    _try_command,
+    copy_to_clipboard,
     format_score,
     generate_row,
     generate_score,
@@ -109,6 +111,36 @@ class TestFormatScore(unittest.TestCase):
         lines = text.splitlines()
         # header + blank + 3 emoji rows = 5 lines
         self.assertEqual(len(lines), 5)
+
+
+class TestClipboard(unittest.TestCase):
+    def test_clip_uses_utf16_encoding(self):
+        """Windows clip must receive UTF-16 (with BOM) so emoji paste correctly."""
+        sample = f"Wordle 1 2/6\n\n{BLACK * WORD_LENGTH}\n{GREEN * WORD_LENGTH}"
+        with patch("subprocess.run") as mock_run:
+            mock_run.return_value.returncode = 0
+            _try_command(["clip"], sample, encoding="utf-16")
+            mock_run.assert_called_once()
+            _, kwargs = mock_run.call_args
+            self.assertEqual(kwargs["input"], sample.encode("utf-16"))
+
+    def test_copy_to_clipboard_passes_utf16_to_clip(self):
+        """copy_to_clipboard calls clip with UTF-16 encoded bytes."""
+        sample = f"Wordle 1 2/6\n\n{BLACK * WORD_LENGTH}\n{GREEN * WORD_LENGTH}"
+
+        def fake_run(cmd, **kwargs):
+            if cmd == ["clip"]:
+                self.assertEqual(
+                    kwargs["input"],
+                    sample.encode("utf-16"),
+                    "clip must receive UTF-16 bytes to preserve emoji",
+                )
+            return type("R", (), {"returncode": 0})()
+
+        with patch("wordle_faker._try_pyperclip", return_value=False), \
+             patch("subprocess.run", side_effect=fake_run):
+            result = copy_to_clipboard(sample)
+        self.assertTrue(result)
 
 
 if __name__ == "__main__":
