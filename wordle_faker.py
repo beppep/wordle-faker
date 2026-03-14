@@ -97,9 +97,9 @@ def _try_pyperclip(text: str) -> bool:
         return False
 
 
-def _try_command(cmd: list[str], text: str) -> bool:
+def _try_command(cmd: list[str], text: str, encoding: str = "utf-8") -> bool:
     try:
-        subprocess.run(cmd, input=text.encode(), check=True, stderr=subprocess.DEVNULL)
+        subprocess.run(cmd, input=text.encode(encoding), check=True, stderr=subprocess.DEVNULL)
         return True
     except (subprocess.CalledProcessError, FileNotFoundError, OSError):
         return False
@@ -121,8 +121,8 @@ def copy_to_clipboard(text: str) -> bool:
     # macOS
     if _try_command(["pbcopy"], text):
         return True
-    # Windows – clip
-    if _try_command(["clip"], text):
+    # Windows – clip (requires UTF-16 LE with BOM for correct Unicode/emoji handling)
+    if _try_command(["clip"], text, encoding="utf-16"):
         return True
     return False
 
